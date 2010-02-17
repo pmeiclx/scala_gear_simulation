@@ -8,7 +8,7 @@
     <properties>
         <scala.version>2.8.0-SNAPSHOT</scala.version>
     </properties>
-    
+
     <repositories>
         <repository>
             <id>scala-tools.org</id>
@@ -74,6 +74,19 @@
                 <configuration>
                     <scalaVersion>${scala.version}</scalaVersion>
                     <mainClass>ch.clx.geargui.GearGUI</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>ch.clx.geargui.GearGUI</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>
