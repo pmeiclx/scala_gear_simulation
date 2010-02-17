@@ -21,11 +21,11 @@ If you want use IDEA IntelliJ just open the project and switch the run configura
 
 ### Easy start with maven
   1.  Open the setEnv.cmd in the project directory in an editor. Change this line: set JAVA_HOME=
-JAVA_HOME should point to JDK 1.5 or JDK 1.6
+    JAVA_HOME should point to JDK 1.5 or JDK 1.6
   2.  Open a commandline (cmd) and change to the project directory
   3.  run the following command: setEnv.cmd
   4.  run the following command: mvn
-The application will start
+    The application will start
   5.  for changing the JDK just edit the setEnv.cmd and start at step 2 again
 
 ### Full configuration for windows
