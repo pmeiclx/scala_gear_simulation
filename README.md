@@ -28,19 +28,19 @@ If you want use IDEA IntelliJ just open the project and switch the run configura
 
 ### Full configuration for windows
 For running from console you have to change the path environement variable:
-  1.  define a new variable for JDK 1.5 i.E.
-  1.1 Variable name: JAVA_HOME_15
-  1.1 Variable value: C:\Java\jdk1.5.0_21
-  2.  define a new variable for JDK 1.6 i.E.
-  2.1 Variable name: JAVA_HOME_16
-  2.2 Variable value: C:\Java\jdk1.6.0_16
-  3.  use the normal JAVA_HOME variable for switching i.E.
-  3.1  Variable name: JAVA_HOME
-  3.2  Variable value: %JAVA_HOME_15%
-  3.3  change the value in %JAVA_HOME% to %JAVA_HOME_16% for using JDK/JRE 1.6
-  4.  make sure that the normal %JAVA_HOME% is in your path-var at first position. For more informations: http://forums.sun.com/thread.jspa?messageID=9633247#9633247
-  5.  you can now run the project with maven: mvn 
-(default goal in pom.xml is set to scala:run)
+1.  define a new variable for JDK 1.5 i.E.
+        Variable name: JAVA_HOME_15
+        Variable value: C:\Java\jdk1.5.0_21
+2.  define a new variable for JDK 1.6 i.E.
+        Variable name: JAVA_HOME_16
+        Variable value: C:\Java\jdk1.6.0_16
+3.  use the normal JAVA_HOME variable for switching i.E.
+        Variable name: JAVA_HOME
+        Variable value: %JAVA_HOME_15%
+    change the value in %JAVA_HOME% to %JAVA_HOME_16% for using JDK/JRE 1.6
+4.  make sure that the normal %JAVA_HOME% is in your path-var at first position. For more informations: http://forums.sun.com/thread.jspa?messageID=9633247#9633247
+5.  you can now run the project with maven: mvn 
+    (default goal in pom.xml is set to scala:run)
     
 ## TODO
 - Replace all println with a logging util.
