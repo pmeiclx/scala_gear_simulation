@@ -20,12 +20,10 @@ If you change to Java JRE 1.6 only 2-3 gears are working simultaneously instead 
 If you want use IDEA IntelliJ just open the project and switch the run configuration
 
 ### Easy start with maven
-  1.  Open the setEnv.cmd in the project directory in an editor. Change this line: set JAVA_HOME=
-    JAVA_HOME should point to JDK 1.5 or JDK 1.6
+  1.  Open the setEnv.cmd in the project directory in an editor. Change this line (JAVA_HOME should point to JDK 1.5 or JDK 1.6): set JAVA_HOME=
   2.  Open a commandline (cmd) and change to the project directory
   3.  run the following command: setEnv.cmd
-  4.  run the following command: mvn
-    The application will start
+  4.  run the following command (The application will start): mvn
   5.  for changing the JDK just edit the setEnv.cmd and start at step 2 again
 
 ### Full configuration for windows
