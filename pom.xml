@@ -76,8 +76,7 @@
                     <mainClass>ch.clx.geargui.GearGUI</mainClass>
                 </configuration>
             </plugin>
-            <plugin>
-                
+            <plugin>                 
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptorRefs>
