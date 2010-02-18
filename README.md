@@ -3,7 +3,8 @@ A gear simulation in Scala
 
 ## Introduction
 A simulation of gears using actors and scala-swing in Scala 2.8-Snapshot. 
-To get familiar with the scala actors I wrote a small simulation with some gears and one controller: <br />
+To get familiar with the scala actors I wrote a small simulation with some gears and one controller:
+
 - The ActorApplication creates 40 gears with random speed.
 - The controller calculates a synchronization speed and starts the gear-actors.
 - The gears synchronize to this given speed step by step (1+ or 1-).
