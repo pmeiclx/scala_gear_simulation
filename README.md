@@ -20,11 +20,14 @@ If you change to Java JRE 1.6 only 2-3 gears are working simultaneously instead 
 If you want use IDEA IntelliJ just open the project and switch the run configuration
 
 ### Easy start with maven
-  1.  Open the setEnv.cmd in the project directory in an editor. Change this line (JAVA_HOME should point to JDK 1.5 or JDK 1.6): set JAVA_HOME=
-  2.  Open a commandline (cmd) and change to the project directory
-  3.  run the following command: setEnv.cmd
-  4.  run the following command (The application will start): mvn
-  5.  for changing the JDK just edit the setEnv.cmd and start at step 2 again
+1.  Open the setEnv.cmd in the project directory in an editor. Change this line: <i>set JAVA_HOME=</i>
+    (JAVA_HOME should point to JDK 1.5 or JDK 1.6)
+2.  Open a commandline (cmd) and change to the project directory
+3.  run the following command: 
+        setEnv.cmd
+4.  run the following command (The application will start): 
+        mvn
+5.  for changing the JDK just edit the setEnv.cmd and start at <b>step 2</b> again
 
 ### Full configuration for windows
 For running from console you have to change the path environement variable:
@@ -37,7 +40,7 @@ For running from console you have to change the path environement variable:
 3.  use the normal JAVA_HOME variable for switching i.E.
         Variable name: JAVA_HOME
         Variable value: %JAVA_HOME_15%
-    change the value in %JAVA_HOME% to %JAVA_HOME_16% for using JDK/JRE 1.6
+    change the value in <b>%JAVA_HOME%</b> to <i>%JAVA_HOME_16%</i> for using JDK/JRE 1.6
 4.  make sure that the normal %JAVA_HOME% is in your path-var at first position. For more informations: http://forums.sun.com/thread.jspa?messageID=9633247#9633247
 5.  you can now run the project with maven: mvn 
     (default goal in pom.xml is set to scala:run)
