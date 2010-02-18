@@ -3,7 +3,7 @@ A gear simulation in Scala
 
 ## Introduction
 A simulation of gears using actors and scala-swing in Scala 2.8-Snapshot. 
-To get familiar with the scala actors I wrote a small simulation with some gears and one controller:
+To get familiar with the scala actors I wrote a small simulation:
 
 - The ActorApplication creates 40 gears with random speed.
 - The controller calculates a synchronization speed and starts the gear-actors.
@@ -11,7 +11,7 @@ To get familiar with the scala actors I wrote a small simulation with some gears
 - The simulation is finished when all gears have reached the synchronization speed.
 - It's possible to manipulate the working gears with a sabotage-function.
 
-### Interessting side effects
+### Interesting side effects
 The simulation runs well on Java JRE 1.5: all gears are working simultaneously.
 If you change to Java JRE 1.6 only 2-3 gears are working simultaneously instead of 40.
 
@@ -23,7 +23,7 @@ If you want use IDEA IntelliJ just open the project and switch the run configura
 ### Easy start with maven
 1.  Open the setEnv.cmd in the project directory in an editor. Change this line: <i>set JAVA_HOME=</i>
     <br />(JAVA_HOME should point to JDK 1.5 or JDK 1.6)
-2.  Open a commandline (cmd) and change to the project directory
+2.  Open a command line (cmd) and change to the project directory
 3.  run the following command: 
         setEnv.cmd
 4.  run the following command (The application will start): 
@@ -31,7 +31,7 @@ If you want use IDEA IntelliJ just open the project and switch the run configura
 5.  for changing the JDK just edit the setEnv.cmd and start at <b>step 2</b> again.
 
 ### Full configuration for windows
-For running from console you have to change the path environement variable:
+An alternative configuration is to change the PATH environment variable:
 
 1.  define a new variable for JDK 1.5 i.E.
         Variable name: JAVA_HOME_15
