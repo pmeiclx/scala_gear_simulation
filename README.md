@@ -31,6 +31,7 @@ If you want use IDEA IntelliJ just open the project and switch the run configura
 
 ### Full configuration for windows
 For running from console you have to change the path environement variable:
+
 1.  define a new variable for JDK 1.5 i.E.
         Variable name: JAVA_HOME_15
         Variable value: C:\Java\jdk1.5.0_21
