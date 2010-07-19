@@ -54,7 +54,7 @@ class GearController(nGears: ListBuffer[Gear], guiActor: Actor) extends Actor {
         }
 
         case CurrentSpeed(gearId: Int, speed: Int) => {
-          //println("[GearController] gear("+gearId+") currentSpeed: "+speed)
+          println("[GearController] gear("+gearId+") currentSpeed: "+speed)
 
           /**
            * Only forward the message to the gui

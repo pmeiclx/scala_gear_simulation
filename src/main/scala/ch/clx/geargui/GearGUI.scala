@@ -25,7 +25,7 @@ object GearGUI extends SimpleSwingApplication {
   private val sliderCollection = new ListBuffer[GearSlider]
   private val gearCollection = new ListBuffer[Gear]
   private var gearController: GearController = null
-  private val saboteur = new Saboteur()
+  private val saboteur = new Saboteur
 
   object startButton extends Button {text = "Start"}
   object sabotageButton extends Button {text = "Sabotage"}
@@ -50,7 +50,7 @@ object GearGUI extends SimpleSwingApplication {
      * Set properties for mainframe
      */
     title = "Gear Swing Simulation"
-    preferredSize = (800, 600)
+    preferredSize = new java.awt.Dimension(800, 600)
 
     menuBar = new MenuBar {
       contents += new Menu("File") {
@@ -86,7 +86,7 @@ object GearGUI extends SimpleSwingApplication {
        *  Contains two buttons and a label
        */
       val buttonPanel = new FlowPanel {
-        preferredSize = (200, 0)
+        preferredSize = new java.awt.Dimension(200, 0)
         contents += startButton
         contents += sabotageButton
         contents += calculatedSpeedLabel
@@ -99,7 +99,7 @@ object GearGUI extends SimpleSwingApplication {
        * Each slider represents a gear
        */
       val gearPanel = new FlowPanel {
-        preferredSize = (600, 0)
+        preferredSize = new java.awt.Dimension(600, 0)
         for (i <- 0 to nOfGears - 1) {
           object slider extends GearSlider {
             min = 0
