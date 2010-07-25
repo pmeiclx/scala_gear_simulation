@@ -10,47 +10,64 @@ package ch.clx.geargui
  */
 
 import scala.swing._
+import scala.swing.Swing._
 import collection.mutable.ListBuffer
 import event._
-import actors.Actor
 import actors.Actor._
+import scala.actors.{Actor, Scheduler}
+import scala.actors.scheduler.ResizableThreadPoolScheduler
+
 
 object GearGUI extends SimpleSwingApplication {
+
+  //Set manually if you want to have more Gears/Sliders
   private val nOfGears = 40
+
+  //Needed to track the State of the simulation
+  private var nOfSynchGears = 0
+
+  //This coll serves as a // coll to the internal contents coll. Needed for accesss to the elements
+  private val sliderCollection = new ListBuffer[GearSlider]
+
+  //for simplicity reasons (easier sabotage) here and not in the GearController
+  private var gearCollection = new ListBuffer[Gear]
+
+  //Actors used for Communication
+  private var gearController: GearController = null
+  private var saboteur: Saboteur = null
+
+  //This ForkJoin is default
+  var isForkJoinScheduler: Boolean = true
+
 
   /**
    * Setup all GUI components here
-   * All are accessable from this application
+   * All are accessible from this application
    */
-  private val sliderCollection = new ListBuffer[GearSlider]
-  private val gearCollection = new ListBuffer[Gear]
-  private var gearController: GearController = null
-  private val saboteur = new Saboteur
-
   object startButton extends Button {text = "Start"}
   object sabotageButton extends Button {text = "Sabotage"}
   object progressBar extends ProgressBar {labelPainted = true; max = nOfGears; value = 0}
   object calculatedSpeedLabel extends Label {text = "Calculated speed"}
   object calculatedSpeedTextField extends TextField {text = "0"; columns = 3}
 
+  object radioButtonPanel extends BoxPanel(Orientation.Vertical) {
+    border = CompoundBorder(TitledBorder(EtchedBorder, "Scheduler"), EmptyBorder(5, 5, 5, 10))
+    val forkJoinScheduler = new RadioButton("ForkJoinScheduler")
+    val resizableThreadPoolScheduler = new RadioButton("ResizableThreadPoolScheduler")
+    val mutex = new ButtonGroup(forkJoinScheduler, resizableThreadPoolScheduler)
+    mutex.select(forkJoinScheduler)
+    contents ++= mutex.buttons
+  }
 
-  /**
-   * Constructor
-   * do some general things
-   */
-  saboteur.start()
 
   def top = new MainFrame {
-    /**
-     *   Set global vars for some components
-     */
-    var allSilders: ListBuffer[GearSlider] = new ListBuffer()
+
 
     /**
      * Set properties for mainframe
      */
     title = "Gear Swing Simulation"
-    preferredSize = new java.awt.Dimension(800, 600)
+    preferredSize = new java.awt.Dimension(1200, 500)
 
     menuBar = new MenuBar {
       contents += new Menu("File") {
@@ -62,9 +79,10 @@ object GearGUI extends SimpleSwingApplication {
         contents += new MenuItem(Action("Start") {
           startSimulation
         })
-        contents += new MenuItem(Action("Random sabotage") {
-          //Do a total random sabotage (random gear-selection, and random sabotage-value)
-          doSabotage(scala.util.Random.nextInt(gearCollection.length)/2)
+        contents += new MenuItem(Action("Random sabotage n Gears") {
+          if(isSimulationRunning){
+          doSabotage(scala.util.Random.nextInt(gearCollection.length) / 2)
+          }
         })
       }
     }
@@ -83,7 +101,7 @@ object GearGUI extends SimpleSwingApplication {
       orientation = Orientation.Vertical;
 
       /**
-       *  Contains two buttons and a label
+       *  Contains controls for the simulation
        */
       val buttonPanel = new FlowPanel {
         preferredSize = new java.awt.Dimension(200, 0)
@@ -92,11 +110,12 @@ object GearGUI extends SimpleSwingApplication {
         contents += calculatedSpeedLabel
         contents += calculatedSpeedTextField
         contents += progressBar
+        contents += radioButtonPanel
       }
 
       /**
-       * Contains n of Slider
-       * Each slider represents a gear
+       * Contains n singleton instances of GearSlider
+       * Each slider represents a Gear
        */
       val gearPanel = new FlowPanel {
         preferredSize = new java.awt.Dimension(600, 0)
@@ -106,6 +125,8 @@ object GearGUI extends SimpleSwingApplication {
             value = 0
             max = 1000
             majorTickSpacing = 100
+            //must be set to true, otherwise the background color does not show
+            opaque = true
             sliderId = i
           }
           contents += slider
@@ -123,10 +144,14 @@ object GearGUI extends SimpleSwingApplication {
     }
 
     /**
-     * Definies listener and patterns for GUI-eventmatching
+     * Define listener and patterns for GUI-eventmatching
      */
     listenTo(startButton)
     listenTo(sabotageButton)
+    val forkJoinScheduler = radioButtonPanel.forkJoinScheduler
+    val resizableThreadPoolScheduler = radioButtonPanel.resizableThreadPoolScheduler
+    listenTo(forkJoinScheduler)
+    listenTo(resizableThreadPoolScheduler)
     sliderCollection.foreach(s => listenTo(s))
     sliderCollection.foreach(s => listenTo(s.mouse.clicks))
     reactions += {
@@ -139,39 +164,80 @@ object GearGUI extends SimpleSwingApplication {
       case e: MouseReleased =>
         println("[GearGUI] Mouse clicked at " + e.source.asInstanceOf[GearSlider].value)
         doSabotage(e.source.asInstanceOf[GearSlider].sliderId, e.source.asInstanceOf[GearSlider].value)
+      case ButtonClicked(`forkJoinScheduler`) =>
+        println("[GearGUI] ToggleButton forkJoinScheduler clicked")
+        isForkJoinScheduler = true
+      case ButtonClicked(`resizableThreadPoolScheduler`) =>
+        println("[GearGUI] ToggleButton resizableThreadPoolScheduler clicked")
+        isForkJoinScheduler = false
       case _ =>
-      //println("AnyEvent")
+      //println("AnyEvent: ")
     }
   }
 
   def startSimulation = {
-    //TODO check that only one simulation  is running
-    println("[App] start with creating gears")
+    println("[GearGUI] starting new simulation")
+
+    cleanup()
+    handleSchedulerType()
+
+    saboteur = new Saboteur()
+    saboteur.start()
+
     for (i <- 0 until nOfGears) {
       gearCollection += new Gear(i)
     }
     gearController = new GearController(gearCollection, receiver)
-
-    println(sliderCollection.length)
     gearController.start()
     Actor.actor {
       gearController ! StartSync
     }
   }
 
-  /**
-   * Do a random sabotage
-   */
-  def doSabotage(nOfGears: Int) = {
-    val sabotageList = new ListBuffer[Gear]()
-    for (identity <- 0 until nOfGears) {
-      sabotageList += gearCollection.apply(scala.util.Random.nextInt(gearCollection.length))
-    }
-    saboteur ! Sabotage(sabotageList)
+  def cleanup() = {
+    //needed if the simulation is started n times
+    gearCollection = new ListBuffer[Gear]
+    gearController = null
+    saboteur = null
+    progressBar.value = 0
+    nOfSynchGears = 0
   }
 
+
+  def handleSchedulerType() = {
+    //Doc ResizableThreadPoolScheduler see 
+    //http://www.scala-lang.org/docu/files/api/scala/actors/scheduler/ResizableThreadPoolScheduler.html
+    //http://scala-programming-language.1934581.n4.nabble.com/Increase-actor-thread-pool-td1936329.html
+    if (!isForkJoinScheduler)
+      Scheduler.impl = {
+        val s = new ResizableThreadPoolScheduler(true);
+        s.start()
+        s
+      }
+  }
+
+  def isSimulationRunning = nOfSynchGears > 0 && nOfSynchGears < nOfGears
+
+  /**
+   * Do a total random sabotage (random gear-selection, and random sabotage-value)
+   */
+  def doSabotage(nOfGears: Int) = {
+    if (isSimulationRunning) {
+      val sabotageList = new ListBuffer[Gear]()
+      for (identity <- 0 until nOfGears) {
+        sabotageList += gearCollection(scala.util.Random.nextInt(gearCollection.length))
+      }
+      saboteur ! Sabotage(sabotageList)
+    }
+  }
+
+  /**
+   * Do sabotage one Gear (choosen via the Slider)
+   */
   def doSabotage(gearId: Int, toSpeed: Int) = {
-    saboteur ! SabotageManual(gearCollection.apply(gearId), toSpeed)
+    if (isSimulationRunning) {
+      saboteur ! SabotageManual(gearCollection(gearId), toSpeed)
+    }
   }
 
   /**
@@ -182,19 +248,22 @@ object GearGUI extends SimpleSwingApplication {
       receive {
         case CurrentSpeed(gearId: Int, speed: Int) =>
           //println("[GearGUI] (" + gearId + ")] SetSpeed to newSpeed: " + speed)
-          sliderCollection.filter {s => s.sliderId == gearId}.first.value = speed
-          if(sliderCollection.filter {s => s.sliderId == gearId}.first.background != java.awt.Color.RED) {
-            sliderCollection.filter {s => s.sliderId == gearId}.first.background = java.awt.Color.YELLOW
+          findSlider(gearId).value = speed
+          if (findSlider(gearId).background != java.awt.Color.RED) {
+            findSlider(gearId).background = java.awt.Color.YELLOW
           }
         case GearProblem(gearId: Int) =>
-          println("[GearGUI] Attention there is a gear problem!")
-          sliderCollection.filter {s => s.sliderId == gearId}.first.background = java.awt.Color.RED
+          println("[GearGUI] Recieved gear problem - due to Sabotage!")
+          findSlider(gearId).background = java.awt.Color.RED
         case Progress(numberOfSyncGears: Int) =>
           println("[GearGUI] Progress: " + numberOfSyncGears)
           progressBar.value = numberOfSyncGears
+          nOfSynchGears = numberOfSyncGears
+          handleStartButton()
+
         case ReceivedSpeed(gearId: Int) =>
           println("[GearGUI] ReceivedSpeed gearId: " + gearId)
-          sliderCollection.filter {s => s.sliderId == gearId}.first.background = java.awt.Color.GREEN
+          findSlider(gearId).background = java.awt.Color.GREEN
         case SetCalculatedSyncSpeed(syncSpeed: Int) =>
           println("[GearGUI] SetCalculatedSyncSpeed syncSpeed: " + syncSpeed)
           calculatedSpeedTextField.text = syncSpeed.toString
@@ -203,8 +272,21 @@ object GearGUI extends SimpleSwingApplication {
 
       }
     }
+
+    def findSlider(gearId: Int) = {
+      sliderCollection.find(_.sliderId == gearId).get
+    }
+
+    def handleStartButton() = {
+      if (isSimulationRunning) {
+        startButton.enabled = false
+      } else {
+        startButton.enabled = true
+      }
+    }
   }
 }
+
 
 class GearSlider extends Slider {
   var sliderId = -1;
