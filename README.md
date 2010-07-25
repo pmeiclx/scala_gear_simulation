@@ -2,7 +2,7 @@ A gear simulation in Scala
 ========
 
 ## Introduction
-A simulation of gears using actors and scala-swing in Scala 2.8-Snapshot. 
+A simulation of gears using actors and scala-swing with Scala 2.8.final.
 To get familiar with the scala actors I wrote a small simulation:
 
 - The ActorApplication creates 40 gears with random speed.
@@ -14,6 +14,7 @@ To get familiar with the scala actors I wrote a small simulation:
 ### Interesting side effects
 The simulation runs well on Java JRE 1.5: all gears are working simultaneously.
 If you change to Java JRE 1.6 only 2-3 gears are working simultaneously instead of 40.
+see http://stackoverflow.com/questions/2288723/scala-actors-different-behavior-on-jre-1-5-and-1-6
 
 ## Installation
 
@@ -46,7 +47,10 @@ An alternative configuration is to change the PATH environment variable:
 4.  make sure that the normal %JAVA_HOME% is in your path-var at first position. For more informations: http://forums.sun.com/thread.jspa?messageID=9633247#9633247
 5.  you can now run the project with maven: mvn 
     <br />(default goal in pom.xml is set to scala:run)
-    
-## TODO
+
+## Recent changes
+- Added option ResizableThreadPoolScheduler and minor enhancements and bugfixes in GearGUI.scala
+
+## TODOs
 - Replace all println with a logging util.
 - Fix TODOs listed in code.
