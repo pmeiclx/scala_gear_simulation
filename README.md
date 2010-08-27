@@ -59,5 +59,4 @@ An alternative configuration is to change the PATH environment variable:
 - Added option ResizableThreadPoolScheduler and minor enhancements and bugfixes in GearGUI.scala
 
 ## TODOs
-- Replace all println with a logging util.
-- Fix TODOs listed in code.
+- Replace all println with a logging util
