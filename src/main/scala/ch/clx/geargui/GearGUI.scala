@@ -15,8 +15,7 @@ import collection.mutable.ListBuffer
 import event._
 import actors.Actor._
 import scala.actors.{Actor, Scheduler}
-import scala.actors.scheduler.ResizableThreadPoolScheduler
-
+import actors.scheduler.{ForkJoinScheduler, ResizableThreadPoolScheduler}
 
 object GearGUI extends SimpleSwingApplication {
 
@@ -26,7 +25,7 @@ object GearGUI extends SimpleSwingApplication {
   //Needed to track the State of the simulation
   private var nOfSynchGears = 0
 
-  //This coll serves as a // coll to the internal contents coll. Needed for accesss to the elements
+  //This coll serves as a // coll to the internal contents coll. Needed for access to the elements
   private val sliderCollection = new ListBuffer[GearSlider]
 
   //for simplicity reasons (easier sabotage) here and not in the GearController
@@ -36,9 +35,9 @@ object GearGUI extends SimpleSwingApplication {
   private var gearController: GearController = null
   private var saboteur: Saboteur = null
 
-  //This ForkJoin is default
+  //ForkJoinScheduler is default
   var isForkJoinScheduler: Boolean = true
-
+  var schedulerName: String = "forkJoinScheduler"
 
   /**
    * Setup all GUI components here
@@ -66,7 +65,7 @@ object GearGUI extends SimpleSwingApplication {
     /**
      * Set properties for mainframe
      */
-    title = "Gear Swing Simulation"
+    title = "A simulation of gears using actors and scala-swing in Scala 2.8"
     preferredSize = new java.awt.Dimension(1200, 500)
 
     menuBar = new MenuBar {
@@ -167,9 +166,11 @@ object GearGUI extends SimpleSwingApplication {
       case ButtonClicked(`forkJoinScheduler`) =>
         println("[GearGUI] ToggleButton forkJoinScheduler clicked")
         isForkJoinScheduler = true
+        schedulerName = "forkJoinScheduler"
       case ButtonClicked(`resizableThreadPoolScheduler`) =>
         println("[GearGUI] ToggleButton resizableThreadPoolScheduler clicked")
         isForkJoinScheduler = false
+        schedulerName = "resizableThreadPoolScheduler"
       case _ =>
       //println("AnyEvent: ")
     }
@@ -187,11 +188,13 @@ object GearGUI extends SimpleSwingApplication {
     for (i <- 0 until nOfGears) {
       gearCollection += new Gear(i)
     }
-    gearController = new GearController(gearCollection, receiver)
+    gearController = new GearController(gearCollection, receiver, schedulerName)
+    receiver.start()
     gearController.start()
     Actor.actor {
       gearController ! StartSync
     }
+    startButton.enabled = false
   }
 
   def cleanup() = {
@@ -208,15 +211,31 @@ object GearGUI extends SimpleSwingApplication {
     //Doc ResizableThreadPoolScheduler see 
     //http://www.scala-lang.org/docu/files/api/scala/actors/scheduler/ResizableThreadPoolScheduler.html
     //http://scala-programming-language.1934581.n4.nabble.com/Increase-actor-thread-pool-td1936329.html
-    if (!isForkJoinScheduler)
+    if (isForkJoinScheduler) {
       Scheduler.impl = {
-        val s = new ResizableThreadPoolScheduler(true);
+        val s = new ForkJoinScheduler(true);
         s.start()
         s
       }
+    } else {
+          Scheduler.impl = {
+        val s = new ResizableThreadPoolScheduler(true);
+        s.start()
+        s
+    }
+    }
   }
 
   def isSimulationRunning = nOfSynchGears > 0 && nOfSynchGears < nOfGears
+
+  def handleStartButton() = {
+      if (isSimulationRunning) {
+        startButton.enabled = false
+      } else {
+        startButton.enabled = true
+      }
+    }
+
 
   /**
    * Do a total random sabotage (random gear-selection, and random sabotage-value)
@@ -277,13 +296,6 @@ object GearGUI extends SimpleSwingApplication {
       sliderCollection.find(_.sliderId == gearId).get
     }
 
-    def handleStartButton() = {
-      if (isSimulationRunning) {
-        startButton.enabled = false
-      } else {
-        startButton.enabled = true
-      }
-    }
   }
 }
 
