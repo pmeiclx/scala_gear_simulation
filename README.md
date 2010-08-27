@@ -21,6 +21,13 @@ see http://stackoverflow.com/questions/2288723/scala-actors-different-behavior-o
 ### Easy start in IDEA IntelliJ
 If you want use IDEA IntelliJ just open the project and switch the run configuration
 
+#### Debug configuration for IDEA IntelliJ
+1.  Create new Run-Configuration (select Application)
+2.  Use ch.clx.geargui.GearGUI as mainclass
+3.  disable "make" before launch
+4.  enable "maven goal" before launch: compile
+5.  Use debug-button in IDEA
+
 ### Easy start with maven
 1.  Open the setEnv.cmd in the project directory in an editor. Change this line: <i>set JAVA_HOME=</i>
     <br />(JAVA_HOME should point to JDK 1.5 or JDK 1.6)
